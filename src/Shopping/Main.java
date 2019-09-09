@@ -3,10 +3,7 @@ import Goods.Goods;
 
 import java.io.*;
 import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Scanner;
+import java.util.*;
 
 class ShoppingCart extends Goods{
 
@@ -18,8 +15,8 @@ class ShoppingCart extends Goods{
 public class Main {
 
     public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException {
-        HashMap<String, ArrayList<Goods> > goodsHashMap1 = new HashMap<String, ArrayList<Goods> >();
-        HashMap<String, ArrayList<Goods> > goodsHashMap2 = new HashMap<String, ArrayList<Goods> >();
+        HashMap<String, ArrayList<Goods> > goodsHashMap = new HashMap<String, ArrayList<Goods> >();
+
         ArrayList<ShoppingCart> shoppingCarts = new ArrayList<ShoppingCart>();
         try {
             BufferedReader in = new BufferedReader(
@@ -29,45 +26,31 @@ public class Main {
             while((line = in.readLine()) != null){
                 String[] temp = line.split("&……%");
                 Goods tempGoods = new Goods(temp[0],Double.parseDouble(temp[1]),temp[2],Long.parseLong(temp[3]));
-                if(goodsHashMap1.containsKey(temp[0])){
-                    goodsHashMap1.get(temp[0]).add(tempGoods);
+                if(goodsHashMap.containsKey(temp[0])){
+                    goodsHashMap.get(temp[0]).add(tempGoods);
                 }else{
                     ArrayList<Goods> arrayListGoods = new ArrayList<Goods>();
                     arrayListGoods.add(tempGoods);
-                    goodsHashMap1.put(temp[0],arrayListGoods);
+                    goodsHashMap.put(temp[0],arrayListGoods);
                 }
-                if(goodsHashMap2.containsKey(temp[2])){
-                    goodsHashMap2.get(temp[2]).add(tempGoods);
-                }else{
-                    ArrayList<Goods> arrayListGoods = new ArrayList<Goods>();
-                    arrayListGoods.add(tempGoods);
-                    goodsHashMap2.put(temp[2],arrayListGoods);
-                }
-
             }
         }catch (Exception e){
             System.out.println(e.toString());
         }
-        System.out.println(goodsHashMap1.toString());
-        System.out.print("请输入需要购买的物品或物品用途说明：");
+        System.out.println(goodsHashMap.toString());
+        System.out.print("请输入需要购买的物品：");
         Scanner sc = new Scanner(System.in);
         {
             String str = sc.nextLine();
             int idx = 0;
             ArrayList<String> list = new ArrayList<String>();
-            if (goodsHashMap1.containsKey(str)) {
-                for (int i = 0; i < goodsHashMap1.get(str).size(); i++) {
-                    System.out.println(goodsHashMap1.get(str).get(i).toString());
-                    list.add(goodsHashMap1.get(str).get(i).toString());
+            if (goodsHashMap.containsKey(str)) {
+                for (int i = 0; i < goodsHashMap.get(str).size(); i++) {
+                    System.out.println(goodsHashMap.get(str).get(i).toString());
+                    list.add(goodsHashMap.get(str).get(i).toString());
                     idx++;
                 }
-            } else if (goodsHashMap2.containsKey(str)) {
-                for (int i = 0; i < goodsHashMap2.get(str).size(); i++) {
-                    System.out.println(goodsHashMap2.get(str).get(i).toString());
-                    list.add(goodsHashMap2.get(str).get(i).toString());
-                    idx++;
-                }
-            } else {
+            }else {
                 System.out.println("未查找到此物品！");
                 return;
             }
@@ -92,6 +75,7 @@ public class Main {
                     System.out.println("加入成功~！");
                 }catch (Exception e){
                     System.out.println("加入失败~！");
+                    break;
                 }
                 System.out.print("输入-1结束输入/继续输入：");
             }
@@ -104,8 +88,9 @@ public class Main {
             int n = sc.nextInt();
             switch (n){
                 case 1:
-
-                    break;
+                    CheckOut(shoppingCarts,goodsHashMap);
+                    System.out.print(goodsHashMap.toString());
+                    return;
                 case 2:
                     Remove(shoppingCarts);
                     break;
@@ -152,11 +137,23 @@ public class Main {
             System.out.println("删除失败！");
         }
     }
-    static void CheckOut(ArrayList<ShoppingCart> shoppingCarts, HashMap<String, ArrayList<Goods> > goodsHashMap1,  HashMap<String, ArrayList<Goods> > goodsHashMap2 ){
+    static void CheckOut(ArrayList<ShoppingCart> shoppingCarts, HashMap<String, ArrayList<Goods> > goodsHashMap ){
         double sum = 0;
         for(int i = 0; i < shoppingCarts.size(); i++){
-           sum += shoppingCarts.get(i).getPrice();
-           //把goods里面的商品数量修改
+            int n = goodsHashMap.get(shoppingCarts.get(i).getName()).size();
+            for (int j = 0; j < n; j++){
+                if(goodsHashMap.get(shoppingCarts.get(i).getName()).get(j).equals(shoppingCarts.get(i))){
+                    long x = goodsHashMap.get(shoppingCarts.get(i).getName()).get(j).getQuantity();
+                    x -= shoppingCarts.get(i).getQuantity();
+                    if(x <= 0){
+                        System.out.println("购买失败，"+ shoppingCarts.get(i).getName() + "数量不足~！");
+                        break;
+                    }
+                    sum += (double) shoppingCarts.get(i).getPrice()*shoppingCarts.get(i).getQuantity();
+                    goodsHashMap.get(shoppingCarts.get(i).getName()).get(j).setQuantity(x);
+                    break;
+                }
+            }
         }
         System.out.println("一共 " + sum + "元");
         System.out.println("结账成功！");
