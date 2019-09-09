@@ -15,8 +15,8 @@ class ShoppingCart extends Goods{
     }
 }
 
-
 public class Main {
+
     public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException {
         HashMap<String, ArrayList<Goods> > goodsHashMap1 = new HashMap<String, ArrayList<Goods> >();
         HashMap<String, ArrayList<Goods> > goodsHashMap2 = new HashMap<String, ArrayList<Goods> >();
@@ -78,40 +78,87 @@ public class Main {
                     if(x==-1)
                         break;
                     String[] temp = list.get(x).split("    ");
-                    shoppingCarts.add(new ShoppingCart(temp[0],Double.parseDouble(temp[1]),temp[2],Long.parseLong(temp[3])));
-                    for (int i = 0; i < goodsHashMap1.get(temp[0]).size(); i++) {
-                        if(goodsHashMap1.get(temp[0]).get(i).getName().equals(temp[0])&&goodsHashMap1.get(temp[0]).get(i).getDescribe().equals(temp[2])){
-                            goodsHashMap1.get(temp[0]).get(i).setQuantity(goodsHashMap1.get(temp[0]).get(i).getQuantity()-1);
-                            break;
+                    int flag = 0;
+                    ShoppingCart tempShoppingCart = new ShoppingCart(temp[0],Double.parseDouble(temp[1]),temp[2],1);
+                    for(int i = 0; i <shoppingCarts.size(); i++){
+                        if(tempShoppingCart.equals(shoppingCarts.get(i))){
+                            flag = 1;
+                            shoppingCarts.get(i).setQuantity(shoppingCarts.get(i).getQuantity()+1);
                         }
                     }
+                    if(flag == 0)
+                        shoppingCarts.add(new ShoppingCart(temp[0],Double.parseDouble(temp[1]),temp[2],1));
+
                     System.out.println("加入成功~！");
                 }catch (Exception e){
                     System.out.println("加入失败~！");
                 }
-                System.out.print("输入-1结束输入：");
+                System.out.print("输入-1结束输入/继续输入：");
             }
         }
-        System.out.println("这是你的购物车清单~ /r 结账请输入1 删除某一项请输入2 增加某一项请输入3 退出请输入-1");
-        System.out.println(shoppingCarts.toString());
-        int n = sc.nextInt();
-        switch (n){
-            case 1:
+        while(true){
+            System.out.println("这是你的购物车清单~  结账请输入1 删除某一项请输入2 修改某一项数量请输入3 退出请输入-1");
+            for(int i = 0; i < shoppingCarts.size(); i++){
+                System.out.println(shoppingCarts.get(i));
+            }
+            int n = sc.nextInt();
+            switch (n){
+                case 1:
 
-
-                break;
-            case 2:
-
-
-                break;
-            case 3:
-
-
-
-                break;
-            default:
-                return;
+                    break;
+                case 2:
+                    Remove(shoppingCarts);
+                    break;
+                case 3:
+                    Modify(shoppingCarts);
+                    break;
+                default:
+                    return;
+            }
         }
 
+
+    }
+    static void Modify( ArrayList<ShoppingCart> shoppingCarts ){
+        Scanner sc = new Scanner(System.in);
+        for(int i = 0; i < shoppingCarts.size(); i++){
+            System.out.println((i+1) + "：" + shoppingCarts.get(i));
+        }
+        System.out.print("请输入需要修改的商品序列号：");
+        int x = sc.nextInt();
+        System.out.print("请输入需改的数量：");
+        int n = sc.nextInt();
+        try {
+            if(n == 0){
+                shoppingCarts.remove(x-1);
+            }else{
+                shoppingCarts.get(x-1).setQuantity(n);
+            }
+            System.out.println("修改成功！");
+        }catch (Exception e){
+            System.out.println("修改失败！");
+        }
+    }
+    static void Remove(ArrayList<ShoppingCart> shoppingCarts ){
+        Scanner sc = new Scanner(System.in);
+        for(int i = 0; i < shoppingCarts.size(); i++){
+            System.out.println((i+1) + "：" + shoppingCarts.get(i));
+        }
+        System.out.print("请输入需要删除的商品序列号：");
+        int x = sc.nextInt();
+        try {
+            shoppingCarts.remove(x-1);
+        }catch (Exception e){
+            System.out.println("删除失败！");
+        }
+    }
+    static void CheckOut(ArrayList<ShoppingCart> shoppingCarts, HashMap<String, ArrayList<Goods> > goodsHashMap1,  HashMap<String, ArrayList<Goods> > goodsHashMap2 ){
+        double sum = 0;
+        for(int i = 0; i < shoppingCarts.size(); i++){
+           sum += shoppingCarts.get(i).getPrice();
+           //把goods里面的商品数量修改
+        }
+        System.out.println("一共 " + sum + "元");
+        System.out.println("结账成功！");
     }
 }
